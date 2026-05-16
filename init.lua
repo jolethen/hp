@@ -1,4 +1,4 @@
-core.register_craftitem("mymod:sky_essence", {
+core.register_craftitem("hp:sky_essence", {
     description = "Sky Essence\nLook up at the sky and use to permanently increase Max HP!",
     inventory_image = "mymod_sky_essence.png", -- Replace with your item texture
     stack_max = 99,
