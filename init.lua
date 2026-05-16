@@ -1,48 +1,42 @@
-core.register_craftitem("hp:sky_essence", {
-    description = "Sky Essence\nLook up at the sky and use to permanently increase Max HP!",
-    inventory_image = "mymod_sky_essence.png", -- Replace with your item texture
+core.register_craftitem("hp:vitality_essence", {
+    description = "Essence of Vitality\nUse to permanently increase your Max HP!",
+    inventory_image = "mymod_vitality_essence.png", -- Replace with your item texture
     stack_max = 99,
 
     on_use = function(itemstack, user, pointed_thing)
-        -- Ensure it's a real player using it
+        -- Ensure a valid player is using the item
         if not user or not user:is_player() then
             return itemstack
         end
 
-        -- Check the player's look pitch angle
-        -- look_pitch is in radians: negative is UP, positive is DOWN
-        -- -1.0 radians is roughly 57 degrees upward
-        local pitch = user:get_look_pitch()
+        local player_name = user:get_player_name()
 
-        if pitch < -1.0 then
-            -- Get the player's current max properties
-            local props = user:get_properties()
-            local current_max_hp = props.hp_max or 20 -- Fallback to 20 if nil
+        -- Get current max HP from player properties
+        local props = user:get_properties()
+        local current_max_hp = props.hp_max or 20 -- Default engine fallback is 20
 
-            -- Increase the Max HP permanently by 2 (1 full heart)
-            local new_max_hp = current_max_hp + 2
-            user:set_properties({ hp_max = new_max_hp })
+        -- Define the boost amount (2 HP = 1 full heart)
+        local hp_boost = 2
+        local new_max_hp = current_max_hp + hp_boost
 
-            -- Instantly heal the player for the amount gained
-            local current_hp = user:get_hp()
-            user:set_hp(current_hp + 2)
+        -- Apply the new permanent Max HP limit
+        user:set_properties({ hp_max = new_max_hp })
 
-            -- Play a sound effect only to this player
-            core.sound_play("player_hp_up", {
-                to_player = user:get_player_name(),
-                gain = 1.0,
-            }, true)
+        -- Heal the player by the same amount so their current health scales up
+        local current_hp = user:get_hp()
+        user:set_hp(current_hp + hp_boost)
 
-            -- Send a confirmation message
-            core.chat_send_player(user:get_player_name(), "✨ The sky grants you permanent vitality! Max HP increased to " .. new_max_hp .. ".")
+        -- Play a satisfying chime sound to the user
+        core.sound_play("player_hp_up", {
+            to_player = player_name,
+            gain = 1.0,
+        }, true)
 
-            -- Consume 1 item from the stack
-            itemstack:take_item()
-            return itemstack
-        else
-            -- If they aren't looking high enough, remind them
-            core.chat_send_player(user:get_player_name(), "You must look directly up at the sky to consume this item.")
-            return itemstack
-        end
+        -- Notify the player of their new permanent stack total
+        core.chat_send_player(player_name, "❤️ Your maximum health has permanently increased! New Max HP: " .. new_max_hp)
+
+        -- Shrink the item stack by 1 and return it to update the inventory slot
+        itemstack:take_item()
+        return itemstack
     end,
 })
